@@ -1,0 +1,71 @@
+---
+- name: Create system group '{{ ocis_system_user_group }}'
+  group:
+    name: "{{ ocis_system_user_group }}"
+    state: present
+    system: True
+
+- name: Create system user '{{ ocis_system_user }}'
+  user:
+    name: "{{ ocis_system_user }}"
+    group: "{{ ocis_system_user_group }}"
+    home: "{{ ocis_system_user_home }}"
+    comment: "{{ ocis_system_user_comment }}"
+    shell: "{{ ocis_system_user_shell }}"
+    system: True
+    state: present
+
+- name: Create ownCloud Infinite Scale directories
+  loop:
+    - "{{ ocis_config_dir }}"
+    - "{{ ocis_system_user_home }}"
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ ocis_system_user }}"
+    group: "{{ ocis_system_user_group }}"
+
+- name: Download ownCloud Infinite Scale Release '{{ ocis_version }}'
+  get_url:
+    url: "{{ ocis_download_url }}"
+    dest: "{{ ocis_binary }}"
+    checksum: "{{ __ocis_checksum_algorithm }}:{{ ocis_download_url }}.{{ __ocis_checksum_algorithm }}"
+    owner: "{{ ocis_system_user }}"
+    group: "{{ ocis_system_user_group }}"
+    mode: 0750
+
+- name: Install ownCloud Infinite Scale env file
+  template:
+    src: etc/ocis/ocis.env.j2
+    dest: "{{ ocis_config_dir }}/ocis.env"
+    owner: "{{ ocis_system_user }}"
+    group: "{{ ocis_system_user_group }}"
+    mode: 0644
+
+- name: Check if ownCloud Infinite Scale config exists
+  stat:
+    path: "{{ ocis_config_dir }}/ocis.yaml"
+  register: __ocis_config_exists
+
+- name: Initialize ownCloud Infinite Scale configuration
+  ansible.builtin.command:
+  become: True
+  become_user: ocis
+  args:
+    cmd: "{{ ocis_binary }} init --insecure {{ ocis_config_insecure }} --config-path {{ ocis_config_dir }} "
+    creates: "{{ ocis_config_dir }}/ocis.yml"
+  register: __ocis_init_output
+  when: not __ocis_config_exists.stat.exists
+
+- name: Install ocis.service file
+  template:
+    src: etc/systemd/system/ocis.service.j2
+    dest: /etc/systemd/system/ocis.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Systemd Daemon reload
+    - Enable ocis
+    - Start ocis

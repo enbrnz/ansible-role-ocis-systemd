@@ -1,0 +1,15 @@
+---
+- name: Systemd Daemon reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enable ownCloud Infinite Scale service
+  ansible.builtin.systemd:
+    enabled: true
+    name: ocis
+
+- name: Start ownCloud Infinite Scale service
+  ansible.builtin.systemd:
+    state: "started"
+    daemon_reload: true
+    name: ocis

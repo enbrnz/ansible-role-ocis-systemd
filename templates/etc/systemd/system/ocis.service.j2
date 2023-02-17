@@ -1,0 +1,13 @@
+[Unit]
+Description=OCIS server
+
+[Service]
+Type=simple
+User={{ocis_system_user}}
+Group={{ocis_system_user_group}}
+EnvironmentFile={{ocis_config_dir}}/{{ocis_env_file}}
+ExecStart=ocis server
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

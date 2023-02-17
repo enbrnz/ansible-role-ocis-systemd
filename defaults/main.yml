@@ -1,0 +1,27 @@
+---
+ocis_version: "2.0.0"
+ocis_release_channel: "stable"
+# @var ocis_download_url:description: >
+# You can set a custom download url especialy for the enterprise version.
+# @end
+ocis_download_url: "https://download.owncloud.com/ocis/ocis/{{ ocis_release_channel }}/{{ ocis_version }}/ocis-{{ ocis_version }}-linux-amd64"
+
+ocis_system_user: "ocis"
+ocis_system_user_group: "ocis"
+ocis_system_user_home: "/var/lib/ocis"
+ocis_system_user_shell: "/sbin/nologin"
+ocis_system_user_comment: "ownCloud Infinite Scale Application Manager"
+
+ocis_binary: /usr/local/bin/ocis
+
+# Define http vs https? Or assume https?
+ocis_fqdn: example.com
+ocis_proxy_http_addr: "127.0.0.1"
+ocis_proxy_http_port: 9200
+
+ocis_config_dir: /etc/ocis
+ocis_env_file: ocis.env
+ocis_env_file_path: "{{ ocis_config_dir }}/{{ ocis_env_file }}"
+ocis_config_proxy_tls: false
+ocis_config_insecure: "false"
+ocis_base_data_path: "{{ ocis_system_user_home }}"
